@@ -604,6 +604,156 @@
         .affix-table .tier-4:hover {
             background: rgba(139, 90, 158, 0.2);
         }
+
+        /* Tutorial */
+        .tutorial-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #8b4513 0%, #654321 100%);
+            border: 2px solid #d4af37;
+            color: #d4af37;
+            padding: 15px 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            font-weight: bold;
+            font-size: 1.5em;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tutorial-button:hover {
+            transform: scale(1.1) rotate(10deg);
+            box-shadow: 0 8px 30px rgba(212, 175, 55, 0.4);
+        }
+
+        .tutorial-panel {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 380px;
+            max-height: 70vh;
+            background: linear-gradient(135deg, #1a1410 0%, #0f0b08 100%);
+            border: 3px solid #8b4513;
+            border-radius: 15px;
+            padding: 25px;
+            z-index: 999;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+            overflow-y: auto;
+            display: none;
+            animation: slide-in 0.4s ease-out;
+        }
+
+        .tutorial-panel.active {
+            display: block;
+        }
+
+        @keyframes slide-in {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tutorial-panel h3 {
+            font-family: 'Cinzel', serif;
+            color: #d4af37;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-align: center;
+            border-bottom: 2px solid #8b4513;
+            padding-bottom: 10px;
+        }
+
+        .tutorial-section {
+            margin-bottom: 20px;
+        }
+
+        .tutorial-section h4 {
+            font-family: 'Cinzel', serif;
+            color: #c9a961;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tutorial-section p {
+            color: #b8a67d;
+            line-height: 1.6;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .tutorial-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .tutorial-section li {
+            color: #b8a67d;
+            margin-bottom: 6px;
+            padding-left: 20px;
+            position: relative;
+            line-height: 1.5;
+            font-size: 0.9em;
+        }
+
+        .tutorial-section li:before {
+            content: "•";
+            color: #d4af37;
+            font-weight: bold;
+            position: absolute;
+            left: 5px;
+        }
+
+        .tutorial-close {
+            background: rgba(139, 69, 19, 0.5);
+            border: 1px solid #8b4513;
+            color: #d4af37;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            width: 100%;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .tutorial-close:hover {
+            background: rgba(139, 69, 19, 0.8);
+            border-color: #d4af37;
+        }
+
+        .tutorial-panel::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .tutorial-panel::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
+
+        .tutorial-panel::-webkit-scrollbar-thumb {
+            background: #8b4513;
+            border-radius: 4px;
+        }
+
+        .tutorial-panel::-webkit-scrollbar-thumb:hover {
+            background: #d4af37;
+        }
     </style>
 </head>
 <body>
@@ -1028,6 +1178,48 @@
         </div>
     </div>
 
+    <!-- Botão de Tutorial -->
+    <button class="tutorial-button" id="tutorialButton">?</button>
+
+    <!-- Painel de Tutorial -->
+    <div class="tutorial-panel" id="tutorialPanel">
+        <h3>📜 Guia da Forja 📜</h3>
+        
+        <div class="tutorial-section">
+            <h4>1️⃣ Preencha seus atributos</h4>
+            <p><strong>🔹 Foco:</strong> Representa sua concentração durante a forja. Quanto maior o foco, maior será seu poder total.</p>
+            <p><strong>🔹 Forja:</strong> Indica sua experiência como ferreiro. Este valor aumenta diretamente seu domínio sobre a criação de artefatos.</p>
+        </div>
+
+        <div class="tutorial-section">
+            <h4>2️⃣ Escolha sua ferramenta</h4>
+            <p>Selecione o modificador da ferramenta que você está usando. Ferramentas melhores oferecem modificadores maiores e aumentam suas chances de criar itens raros.</p>
+        </div>
+
+        <div class="tutorial-section">
+            <h4>3️⃣ Defina os ingredientes</h4>
+            <p>Informe:</p>
+            <ul>
+                <li>Quantidade de ingredientes usados</li>
+                <li>Soma do valor dos ingredientes</li>
+            </ul>
+            <p>🔎 O sistema calcula a qualidade média dos materiais. Poucos ingredientes bons são mais eficientes do que muitos ingredientes fracos.</p>
+        </div>
+
+        <div class="tutorial-section">
+            <h4>4️⃣ Calcule o resultado</h4>
+            <p>Após preencher todos os campos, o sistema irá:</p>
+            <ul>
+                <li>Calcular seu Poder Total</li>
+                <li>Identificar automaticamente seu nível de forja</li>
+                <li>Aplicar as fórmulas corretas de chance</li>
+                <li>Mostrar as porcentagens de cada raridade</li>
+            </ul>
+        </div>
+
+        <button class="tutorial-close" id="tutorialClose">Fechar</button>
+    </div>
+
     <script>
         let chart;
 
@@ -1220,6 +1412,26 @@
             event.target.classList.add('active');
             document.getElementById('affix-' + type).classList.add('active');
         }
+
+        // Sistema de tutorial
+        const tutorialButton = document.getElementById('tutorialButton');
+        const tutorialPanel = document.getElementById('tutorialPanel');
+        const tutorialClose = document.getElementById('tutorialClose');
+
+        tutorialButton.addEventListener('click', function() {
+            tutorialPanel.classList.toggle('active');
+        });
+
+        tutorialClose.addEventListener('click', function() {
+            tutorialPanel.classList.remove('active');
+        });
+
+        // Fechar tutorial ao clicar fora
+        document.addEventListener('click', function(event) {
+            if (!tutorialPanel.contains(event.target) && !tutorialButton.contains(event.target)) {
+                tutorialPanel.classList.remove('active');
+            }
+        });
     </script>
 </body>
 </html>

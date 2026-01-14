@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forja de Artefatos - Super Medieval</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Crimson Text', serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            padding: 20px;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(139, 69, 19, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(70, 30, 10, 0.1) 0%, transparent 50%);
+            overflow-x: hidden;
+        }
+
+        /* Partículas de fogo */
+        .fire-particle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: #ff6b35;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+            box-shadow: 0 0 10px #ff6b35;
+            animation: float-up 4s linear infinite;
+        }
+
+        @keyframes float-up {
+            0% {
+                transform: translateY(0) translateX(0) scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: translateY(-50vh) translateX(20px) scale(1.2);
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(-20px) scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #1a1410 0%, #0f0b08 100%);
+            border: 3px solid #8b4513;
+            border-radius: 10px;
+            box-shadow: 
+                0 0 30px rgba(139, 69, 19, 0.3),
+                inset 0 0 50px rgba(0, 0, 0, 0.5),
+                0 0 60px rgba(212, 175, 55, 0.2);
+            position: relative;
+            overflow: hidden;
+            animation: glow-pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes glow-pulse {
+            0%, 100% {
+                box-shadow: 
+                    0 0 30px rgba(139, 69, 19, 0.3),
+                    inset 0 0 50px rgba(0, 0, 0, 0.5),
+                    0 0 60px rgba(212, 175, 55, 0.2);
+            }
+            50% {
+                box-shadow: 
+                    0 0 40px rgba(139, 69, 19, 0.5),
+                    inset 0 0 50px rgba(0, 0, 0, 0.5),
+                    0 0 80px rgba(212, 175, 55, 0.3);
+            }
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(139, 69, 19, 0.03) 2px,
+                    rgba(139, 69, 19, 0.03) 4px
+                );
+            pointer-events: none;
+        }
+
+        /* Efeito de bordas brilhantes */
+        .container::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, 
+                transparent 0%, 
+                rgba(212, 175, 55, 0.1) 25%, 
+                transparent 50%, 
+                rgba(212, 175, 55, 0.1) 75%, 
+                transparent 100%);
+            border-radius: 10px;
+            z-index: -1;
+            animation: border-glow 4s linear infinite;
+            background-size: 200% 200%;
+        }
+
+        @keyframes border-glow {
+            0% {
+                background-position: 0% 50%;
+            }
+            100% {
+                background-position: 200% 50%;
+            }
+        }
+
+        .header {
+            background: linear-gradient(180deg, #2d1810 0%, #1a1410 100%);
+            border-bottom: 2px solid #8b4513;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::after {
+            content: '⚔ ⚒ ⚔';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1410;
+            padding: 0 20px;
+            color: #d4af37;
+            font-size: 1.2em;
+            animation: symbol-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes symbol-glow {
+            0%, 100% {
+                text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+            }
+            50% {
+                text-shadow: 0 0 20px rgba(212, 175, 55, 0.8);
+            }
+        }
+
+        h1 {
+            font-family: 'Cinzel', serif;
+            color: #d4af37;
+            font-size: 2.8em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            animation: title-shine 3s ease-in-out infinite;
+        }
+
+        @keyframes title-shine {
+            0%, 100% {
+                text-shadow: 
+                    2px 2px 4px rgba(0, 0, 0, 0.8),
+                    0 0 10px rgba(212, 175, 55, 0.3);
+            }
+            50% {
+                text-shadow: 
+                    2px 2px 4px rgba(0, 0, 0, 0.8),
+                    0 0 20px rgba(212, 175, 55, 0.6);
+            }
+        }
+
+        .subtitle {
+            color: #b8860b;
+            font-size: 1.2em;
+            font-style: italic;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .creator-name {
+            color: #8b6f47;
+            font-size: 0.9em;
+            font-style: italic;
+            letter-spacing: 0.5px;
+            margin-top: 8px;
+        }
+
+        .content {
+            padding: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .section {
+            background: rgba(45, 24, 16, 0.6);
+            border: 2px solid #8b4513;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                inset 0 0 20px rgba(0, 0, 0, 0.5),
+                0 10px 30px rgba(212, 175, 55, 0.2);
+        }
+
+        .section h2 {
+            font-family: 'Cinzel', serif;
+            color: #d4af37;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #8b4513;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+            animation: fade-in 0.5s ease-in-out;
+        }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #c9a961;
+            font-weight: 600;
+            font-size: 1.1em;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(10, 10, 10, 0.8);
+            border: 2px solid #8b4513;
+            border-radius: 5px;
+            font-size: 16px;
+            color: #d4af37;
+            font-family: 'Crimson Text', serif;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #d4af37;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+            background: rgba(20, 20, 20, 0.9);
+            transform: scale(1.02);
+        }
+
+        input:hover {
+            border-color: #c9a961;
+        }
+
+        .results {
+            background: linear-gradient(135deg, rgba(139, 69, 19, 0.3) 0%, rgba(70, 30, 10, 0.3) 100%);
+        }
+
+        .result-item {
+            background: rgba(10, 10, 10, 0.6);
+            padding: 15px;
+            border: 1px solid #8b4513;
+            border-radius: 5px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .result-item:hover {
+            background: rgba(20, 20, 20, 0.8);
+            transform: translateX(5px);
+            border-color: #d4af37;
+        }
+
+        .result-label {
+            color: #c9a961;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .result-value {
+            color: #d4af37;
+            font-size: 1.4em;
+            font-weight: bold;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+            animation: number-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes number-pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .chart-section {
+            background: rgba(45, 24, 16, 0.6);
+            border: 2px solid #8b4513;
+            border-radius: 8px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+
+        .chart-section h2 {
+            font-family: 'Cinzel', serif;
+            color: #d4af37;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 1.8em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .chances-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .chance-card {
+            background: rgba(10, 10, 10, 0.8);
+            padding: 20px 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 3px solid;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
+            transition: all 0.4s ease;
+            cursor: pointer;
+        }
+
+        .chance-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 
+                inset 0 0 15px rgba(0, 0, 0, 0.5),
+                0 15px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .chance-card.comum { border-color: #7a7a7a; }
+        .chance-card.incomum { border-color: #4a7c59; }
+        .chance-card.raro { border-color: #4a6fa5; }
+        .chance-card.epico { border-color: #8b5a9e; }
+        .chance-card.lendario { 
+            border-color: #d4af37;
+            animation: legendary-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes legendary-glow {
+            0%, 100% {
+                box-shadow: 
+                    inset 0 0 15px rgba(0, 0, 0, 0.5),
+                    0 0 20px rgba(212, 175, 55, 0.3);
+            }
+            50% {
+                box-shadow: 
+                    inset 0 0 15px rgba(0, 0, 0, 0.5),
+                    0 0 40px rgba(212, 175, 55, 0.6);
+            }
+        }
+
+        .chance-name {
+            font-family: 'Cinzel', serif;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            font-size: 0.95em;
+            letter-spacing: 1px;
+        }
+
+        .chance-card.comum .chance-name { color: #7a7a7a; }
+        .chance-card.incomum .chance-name { color: #4a7c59; }
+        .chance-card.raro .chance-name { color: #4a6fa5; }
+        .chance-card.epico .chance-name { color: #8b5a9e; }
+        .chance-card.lendario .chance-name { 
+            color: #d4af37;
+            animation: legendary-text 2s ease-in-out infinite;
+        }
+
+        @keyframes legendary-text {
+            0%, 100% {
+                text-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
+            }
+            50% {
+                text-shadow: 0 0 15px rgba(212, 175, 55, 1);
+            }
+        }
+
+        .chance-value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .chance-card.comum .chance-value { color: #a0a0a0; }
+        .chance-card.incomum .chance-value { color: #5fa372; }
+        .chance-card.raro .chance-value { color: #6b9fd9; }
+        .chance-card.epico .chance-value { color: #b378cc; }
+        .chance-card.lendario .chance-value { color: #ffd700; }
+
+        .chart-container {
+            background: rgba(10, 10, 10, 0.5);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #8b4513;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #8b6f47;
+            font-style: italic;
+            border-top: 1px solid #8b4513;
+            margin-top: 20px;
+            animation: fade-in 1s ease-in-out;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chances-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .affix-tabs {
+                flex-direction: column;
+            }
+
+            .affix-tab {
+                width: 100%;
+            }
+
+            .affix-table-container {
+                overflow-x: auto;
+            }
+
+            .affix-table {
+                font-size: 0.85em;
+            }
+        }
+
+        /* Estilos dos Afixos */
+        .affix-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+
+        .affix-tab {
+            background: rgba(45, 24, 16, 0.6);
+            border: 2px solid #8b4513;
+            color: #c9a961;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .affix-tab:hover {
+            background: rgba(70, 30, 10, 0.8);
+            border-color: #d4af37;
+            color: #d4af37;
+            transform: translateY(-2px);
+        }
+
+        .affix-tab.active {
+            background: linear-gradient(135deg, #8b4513 0%, #654321 100%);
+            border-color: #d4af37;
+            color: #ffd700;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+        }
+
+        .affix-content {
+            display: none;
+        }
+
+        .affix-content.active {
+            display: block;
+            animation: fade-in 0.5s ease-in-out;
+        }
+
+        .affix-table-container {
+            background: rgba(10, 10, 10, 0.5);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #8b4513;
+            overflow-x: auto;
+        }
+
+        .affix-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Crimson Text', serif;
+        }
+
+        .affix-table thead {
+            background: linear-gradient(135deg, #8b4513 0%, #654321 100%);
+        }
+
+        .affix-table th {
+            padding: 15px;
+            text-align: left;
+            color: #ffd700;
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            border: 1px solid #d4af37;
+            font-size: 1em;
+        }
+
+        .affix-table td {
+            padding: 12px 15px;
+            color: #d4af37;
+            border: 1px solid #8b4513;
+            font-size: 1em;
+            font-weight: 500;
+        }
+
+        .affix-table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .affix-table tbody tr:hover {
+            background: rgba(139, 69, 19, 0.3);
+            transform: scale(1.01);
+        }
+
+        .affix-table .tier-1 {
+            background: rgba(122, 122, 122, 0.1);
+        }
+
+        .affix-table .tier-2 {
+            background: rgba(74, 124, 89, 0.1);
+        }
+
+        .affix-table .tier-3 {
+            background: rgba(74, 111, 165, 0.1);
+        }
+
+        .affix-table .tier-4 {
+            background: rgba(139, 90, 158, 0.1);
+        }
+
+        .affix-table .tier-1:hover {
+            background: rgba(122, 122, 122, 0.2);
+        }
+
+        .affix-table .tier-2:hover {
+            background: rgba(74, 124, 89, 0.2);
+        }
+
+        .affix-table .tier-3:hover {
+            background: rgba(74, 111, 165, 0.2);
+        }
+
+        .affix-table .tier-4:hover {
+            background: rgba(139, 90, 158, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <!-- Partículas de fogo -->
+    <div id="fireParticles"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>⚒ FORJA DE ARTEFATOS ⚒</h1>
+            <p class="subtitle">Maestria da Forja • Faixa 301-350</p>
+            <p class="creator-name">Feito por Gaúcho - Jota Periculoso</p>
+        </div>
+
+        <div class="content">
+            <div class="grid">
+                <div class="section">
+                    <h2>⚙ Atributos do Artesão</h2>
+                    <div class="input-group">
+                        <label for="foco">Foco</label>
+                        <input type="number" id="foco" value="50" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="forja">Nível de Forja</label>
+                        <input type="number" id="forja" value="10" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="modFerramenta">Modificador da Ferramenta</label>
+                        <input type="number" id="modFerramenta" value="5" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="somaIngredientes">Soma dos Ingredientes</label>
+                        <input type="number" id="somaIngredientes" value="100" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="qtdIngredientes">Quantidade de Ingredientes</label>
+                        <input type="number" id="qtdIngredientes" value="4" min="1">
+                    </div>
+                </div>
+
+                <div class="section results">
+                    <h2>✦ Poder de Forja</h2>
+                    <div class="result-item">
+                        <span class="result-label">Mod. de Ingredientes:</span>
+                        <span class="result-value" id="modIngredientes">25.00</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Poder Total (P):</span>
+                        <span class="result-value" id="poderTotal">140.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-section">
+                <h2>⚔ Probabilidade de Raridade ⚔</h2>
+                
+                <div class="chances-grid">
+                    <div class="chance-card comum">
+                        <div class="chance-name">Comum</div>
+                        <div class="chance-value" id="chanceComum">10%</div>
+                    </div>
+                    <div class="chance-card incomum">
+                        <div class="chance-name">Incomum</div>
+                        <div class="chance-value" id="chanceIncomum">52%</div>
+                    </div>
+                    <div class="chance-card raro">
+                        <div class="chance-name">Raro</div>
+                        <div class="chance-value" id="chanceRaro">72%</div>
+                    </div>
+                    <div class="chance-card epico">
+                        <div class="chance-name">Épico</div>
+                        <div class="chance-value" id="chanceEpico">0%</div>
+                    </div>
+                    <div class="chance-card lendario">
+                        <div class="chance-name">Lendário</div>
+                        <div class="chance-value" id="chanceLendario">0%</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="chartCanvas"></canvas>
+                </div>
+            </div>
+
+            <div class="footer">
+                "O verdadeiro poder não reside apenas no aço, mas na maestria de quem o forja."
+            </div>
+
+            <!-- Seção de Afixos -->
+            <div class="chart-section" style="margin-top: 40px;">
+                <h2>📜 Tabela de Afixos 📜</h2>
+                
+                <div class="affix-tabs">
+                    <button class="affix-tab active" onclick="showAffix('atributo')">Afixos de Atributo</button>
+                    <button class="affix-tab" onclick="showAffix('arma')">Afixos de Armas</button>
+                    <button class="affix-tab" onclick="showAffix('armadura')">Afixos de Armadura</button>
+                </div>
+
+                <!-- Afixos de Atributo -->
+                <div id="affix-atributo" class="affix-content active">
+                    <div class="affix-table-container">
+                        <table class="affix-table">
+                            <thead>
+                                <tr>
+                                    <th>Tier</th>
+                                    <th>Afixo</th>
+                                    <th>Atributo</th>
+                                    <th>Valor</th>
+                                    <th>Raridade</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="tier-1">
+                                    <td>1</td>
+                                    <td>Ágil</td>
+                                    <td>Agility</td>
+                                    <td>+1 a +3</td>
+                                    <td>1-2</td>
+                                </tr>
+                                <tr class="tier-1">
+                                    <td>1</td>
+                                    <td>Forte</td>
+                                    <td>Strength</td>
+                                    <td>+1 a +3</td>
+                                    <td>1-2</td>
+                                </tr>
+                                <tr class="tier-1">
+                                    <td>1</td>
+                                    <td>Inteligente</td>
+                                    <td>Intelligence</td>
+                                    <td>+1 a +3</td>
+                                    <td>1-2</td>
+                                </tr>
+                                <tr class="tier-1">
+                                    <td>1</td>
+                                    <td>Rígida</td>
+                                    <td>Constitution</td>
+                                    <td>+1 a +3</td>
+                                    <td>1-2</td>
+                                </tr>
+                                <tr class="tier-1">
+                                    <td>1</td>
+                                    <td>Perspicaz</td>
+                                    <td>Focus</td>
+                                    <td>+1 a +3</td>
+                                    <td>1-2</td>
+                                </tr>
+                                <tr class="tier-1">
+                                    <td>1</td>
+                                    <td>Ligeira</td>
+                                    <td>Dexterity</td>
+                                    <td>+1 a +3</td>
+                                    <td>1-2</td>
+                                </tr>
+                                <tr class="tier-2">
+                                    <td>2</td>
+                                    <td>Veloz</td>
+                                    <td>Agility</td>
+                                    <td>+3 a +5</td>
+                                    <td>2-3</td>
+                                </tr>
+                                <tr class="tier-2">
+                                    <td>2</td>
+                                    <td>Robusta</td>
+                                    <td>Strength</td>
+                                    <td>+3 a +5</td>
+                                    <td>2-3</td>
+                                </tr>
+                                <tr class="tier-2">
+                                    <td>2</td>
+                                    <td>Sábio</td>
+                                    <td>Intelligence</td>
+                                    <td>+3 a +5</td>
+                                    <td>2-3</td>
+                                </tr>
+                                <tr class="tier-2">
+                                    <td>2</td>
+                                    <td>Inflexível</td>
+                                    <td>Constitution</td>
+                                    <td>+3 a +5</td>
+                                    <td>2-3</td>
+                                </tr>
+                                <tr class="tier-2">
+                                    <td>2</td>
+                                    <td>Sagaz</td>
+                                    <td>Focus</td>
+                                    <td>+3 a +5</td>
+                                    <td>2-3</td>
+                                </tr>
+                                <tr class="tier-2">
+                                    <td>2</td>
+                                    <td>Lépida</td>
+                                    <td>Dexterity</td>
+                                    <td>+3 a +5</td>
+                                    <td>2-3</td>
+                                </tr>
+                                <tr class="tier-3">
+                                    <td>3</td>
+                                    <td>Impetuosa</td>
+                                    <td>Agility</td>
+                                    <td>+6 a +10</td>
+                                    <td>3-4</td>
+                                </tr>
+                                <tr class="tier-3">
+                                    <td>3</td>
+                                    <td>Pujante</td>
+                                    <td>Strength</td>
+                                    <td>+6 a +10</td>
+                                    <td>3-4</td>
+                                </tr>
+                                <tr class="tier-3">
+                                    <td>3</td>
+                                    <td>Genial</td>
+                                    <td>Intelligence</td>
+                                    <td>+6 a +10</td>
+                                    <td>3-4</td>
+                                </tr>
+                                <tr class="tier-3">
+                                    <td>3</td>
+                                    <td>Indestrutível</td>
+                                    <td>Constitution</td>
+                                    <td>+6 a +10</td>
+                                    <td>3-4</td>
+                                </tr>
+                                <tr class="tier-3">
+                                    <td>3</td>
+                                    <td>Clarividente</td>
+                                    <td>Focus</td>
+                                    <td>+6 a +10</td>
+                                    <td>3-4</td>
+                                </tr>
+                                <tr class="tier-3">
+                                    <td>3</td>
+                                    <td>Vertiginosa</td>
+                                    <td>Dexterity</td>
+                                    <td>+6 a +10</td>
+                                    <td>3-4</td>
+                                </tr>
+                                <tr class="tier-4">
+                                    <td>4</td>
+                                    <td>Relampejante</td>
+                                    <td>Agility</td>
+                                    <td>+8 a +16</td>
+                                    <td>4-5</td>
+                                </tr>
+                                <tr class="tier-4">
+                                    <td>4</td>
+                                    <td>Titânica</td>
+                                    <td>Strength</td>
+                                    <td>+8 a +16</td>
+                                    <td>4-5</td>
+                                </tr>
+                                <tr class="tier-4">
+                                    <td>4</td>
+                                    <td>Onisciente</td>
+                                    <td>Intelligence</td>
+                                    <td>+8 a +16</td>
+                                    <td>4-5</td>
+                                </tr>
+                                <tr class="tier-4">
+                                    <td>4</td>
+                                    <td>Impenetrável</td>
+                                    <td>Constitution</td>
+                                    <td>+8 a +16</td>
+                                    <td>4-5</td>
+                                </tr>
+                                <tr class="tier-4">
+                                    <td>4</td>
+                                    <td>Infalível</td>
+                                    <td>Focus</td>
+                                    <td>+8 a +16</td>
+                                    <td>4-5</td>
+                                </tr>
+                                <tr class="tier-4">
+                                    <td>4</td>
+                                    <td>Etérea</td>
+                                    <td>Dexterity</td>
+                                    <td>+8 a +16</td>
+                                    <td>4-5</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Afixos de Armas -->
+                <div id="affix-arma" class="affix-content">
+                    <div class="affix-table-container">
+                        <table class="affix-table">
+                            <thead>
+                                <tr>
+                                    <th>Tier</th>
+                                    <th>Afixo</th>
+                                    <th>Efeito</th>
+                                    <th>Valor</th>
+                                    <th>Raridade</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="tier-2">
+                                    <td>2</td>
+                                    <td>Cortante</td>
+                                    <td>+Damage</td>
+                                    <td>+1 a +3</td>
+                                    <td>2-3</td>
+                                </tr>
+                                <tr class="tier-3">
+                                    <td>3</td>
+                                    <td>Afiada</td>
+                                    <td>+Damage</td>
+                                    <td>+4 a +6</td>
+                                    <td>3-4</td>
+                                </tr>
+                                <tr class="tier-3">
+                                    <td>3</td>
+                                    <td>Perfurante</td>
+                                    <td>+Lethality</td>
+                                    <td>+1 a +6</td>
+                                    <td>3-4</td>
+                                </tr>
+                                <tr class="tier-4">
+                                    <td>4</td>
+                                    <td>Vorpal</td>
+                                    <td>+Damage</td>
+                                    <td>+6 a +12</td>
+                                    <td>4-5</td>
+                                </tr>
+                                <tr class="tier-4">
+                                    <td>4</td>
+                                    <td>Transfixante</td>
+                                    <td>+Lethality</td>
+                                    <td>+4 a +12</td>
+                                    <td>4-5</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Afixos de Armadura -->
+                <div id="affix-armadura" class="affix-content">
+                    <div class="affix-table-container">
+                        <table class="affix-table">
+                            <thead>
+                                <tr>
+                                    <th>Tier</th>
+                                    <th>Afixo</th>
+                                    <th>Resistência</th>
+                                    <th>Valor</th>
+                                    <th>Raridade</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="tier-2">
+                                    <td>2</td>
+                                    <td>Tramado</td>
+                                    <td>Slash</td>
+                                    <td>+4 a +8</td>
+                                    <td>2-3</td>
+                                </tr>
+                                <tr class="tier-2">
+                                    <td>2</td>
+                                    <td>Reforçado</td>
+                                    <td>Blunt</td>
+                                    <td>+4 a +8</td>
+                                    <td>2-3</td>
+                                </tr>
+                                <tr class="tier-2">
+                                    <td>2</td>
+                                    <td>Acolchoado</td>
+                                    <td>Pierce</td>
+                                    <td>+4 a +8</td>
+                                    <td>2-3</td>
+                                </tr>
+                                <tr class="tier-3">
+                                    <td>3</td>
+                                    <td>Escamado</td>
+                                    <td>Slash</td>
+                                    <td>+8 a +12</td>
+                                    <td>3-4</td>
+                                </tr>
+                                <tr class="tier-3">
+                                    <td>3</td>
+                                    <td>Denso</td>
+                                    <td>Blunt</td>
+                                    <td>+8 a +12</td>
+                                    <td>3-4</td>
+                                </tr>
+                                <tr class="tier-3">
+                                    <td>3</td>
+                                    <td>Estabilizador</td>
+                                    <td>Pierce</td>
+                                    <td>+8 a +12</td>
+                                    <td>3-4</td>
+                                </tr>
+                                <tr class="tier-4">
+                                    <td>4</td>
+                                    <td>Indivisível</td>
+                                    <td>Slash</td>
+                                    <td>+14 a +26</td>
+                                    <td>4-5</td>
+                                </tr>
+                                <tr class="tier-4">
+                                    <td>4</td>
+                                    <td>Inabalável</td>
+                                    <td>Blunt</td>
+                                    <td>+14 a +26</td>
+                                    <td>4-5</td>
+                                </tr>
+                                <tr class="tier-4">
+                                    <td>4</td>
+                                    <td>Impenetrável</td>
+                                    <td>Pierce</td>
+                                    <td>+14 a +26</td>
+                                    <td>4-5</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let chart;
+
+        // Criar partículas de fogo
+        function createFireParticles() {
+            const container = document.getElementById('fireParticles');
+            
+            setInterval(() => {
+                const particle = document.createElement('div');
+                particle.className = 'fire-particle';
+                particle.style.left = Math.random() * window.innerWidth + 'px';
+                particle.style.bottom = '-10px';
+                particle.style.animationDelay = Math.random() * 2 + 's';
+                
+                container.appendChild(particle);
+                
+                setTimeout(() => {
+                    particle.remove();
+                }, 4000);
+            }, 300);
+        }
+
+        createFireParticles();
+
+        function calcular() {
+            const foco = parseFloat(document.getElementById('foco').value) || 0;
+            const forja = parseFloat(document.getElementById('forja').value) || 0;
+            const modFerramenta = parseFloat(document.getElementById('modFerramenta').value) || 0;
+            const somaIngredientes = parseFloat(document.getElementById('somaIngredientes').value) || 0;
+            const qtdIngredientes = parseFloat(document.getElementById('qtdIngredientes').value) || 1;
+
+            const modIngredientes = somaIngredientes / qtdIngredientes;
+            const poderTotal = foco + (forja * 3) + modFerramenta + modIngredientes;
+
+            document.getElementById('modIngredientes').textContent = modIngredientes.toFixed(2);
+            document.getElementById('poderTotal').textContent = poderTotal.toFixed(2);
+
+            let comum = 10;
+            let incomum = Math.max(0, 80 - 0.2 * poderTotal);
+            let raro = Math.max(0, 100 - 0.2 * poderTotal);
+            let epico = Math.max(0, -65 + 0.3 * poderTotal);
+            let lendario = Math.max(0, -25 + 0.1 * poderTotal);
+
+            // Normalizar para sempre somar 100%
+            const total = comum + incomum + raro + epico + lendario;
+            if (total > 0) {
+                comum = (comum / total) * 100;
+                incomum = (incomum / total) * 100;
+                raro = (raro / total) * 100;
+                epico = (epico / total) * 100;
+                lendario = (lendario / total) * 100;
+            }
+
+            document.getElementById('chanceComum').textContent = comum.toFixed(1) + '%';
+            document.getElementById('chanceIncomum').textContent = incomum.toFixed(1) + '%';
+            document.getElementById('chanceRaro').textContent = raro.toFixed(1) + '%';
+            document.getElementById('chanceEpico').textContent = epico.toFixed(1) + '%';
+            document.getElementById('chanceLendario').textContent = lendario.toFixed(1) + '%';
+
+            atualizarGrafico(comum, incomum, raro, epico, lendario);
+        }
+
+        function atualizarGrafico(comum, incomum, raro, epico, lendario) {
+            const ctx = document.getElementById('chartCanvas').getContext('2d');
+
+            if (chart) {
+                chart.destroy();
+            }
+
+            chart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Comum', 'Incomum', 'Raro', 'Épico', 'Lendário'],
+                    datasets: [{
+                        data: [comum, incomum, raro, epico, lendario],
+                        backgroundColor: [
+                            '#6E6E6E',
+                            '#2F8F5B',
+                            '#2C5F8A',
+                            '#6B3FA0',
+                            '#C9A24D'
+                        ],
+                        borderWidth: 4,
+                        borderColor: '#1a1410',
+                        hoverBorderColor: '#d4af37',
+                        hoverBorderWidth: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 14,
+                                    family: "'Cinzel', serif"
+                                },
+                                color: '#c9a961'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.parsed.toFixed(1) + '%';
+                                }
+                            },
+                            backgroundColor: 'rgba(26, 20, 16, 0.95)',
+                            titleColor: '#ffd700',
+                            bodyColor: '#d4af37',
+                            borderColor: '#8b4513',
+                            borderWidth: 2,
+                            titleFont: {
+                                size: 14,
+                                family: "'Cinzel', serif",
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 13,
+                                family: "'Crimson Text', serif"
+                            },
+                            padding: 12
+                        }
+                    }
+                }
+            });
+        }
+
+        // Adicionar eventos aos inputs
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', calcular);
+        });
+
+        calcular();
+
+        // Sistema de abas dos afixos
+        function showAffix(type) {
+            // Remover active de todas as abas e conteúdos
+            document.querySelectorAll('.affix-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.affix-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Adicionar active na aba e conteúdo clicado
+            event.target.classList.add('active');
+            document.getElementById('affix-' + type).classList.add('active');
+        }
+    </script>
+</body>
+</html>

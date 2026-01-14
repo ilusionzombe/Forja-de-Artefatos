@@ -613,7 +613,7 @@
     <div class="container">
         <div class="header">
             <h1>⚒ FORJA DE ARTEFATOS ⚒</h1>
-            <p class="subtitle">Maestria da Forja • Faixa 301-350</p>
+            <p class="subtitle">Maestria da Forja • Sistema Dinâmico</p>
             <p class="creator-name">Feito por Gaúcho - Jota Periculoso</p>
         </div>
 
@@ -1065,11 +1065,53 @@
             document.getElementById('modIngredientes').textContent = modIngredientes.toFixed(2);
             document.getElementById('poderTotal').textContent = poderTotal.toFixed(2);
 
-            let comum = 10;
-            let incomum = Math.max(0, 80 - 0.2 * poderTotal);
-            let raro = Math.max(0, 100 - 0.2 * poderTotal);
-            let epico = Math.max(0, -65 + 0.3 * poderTotal);
-            let lendario = Math.max(0, -25 + 0.1 * poderTotal);
+            // Determinar faixa e calcular chances
+            let comum, incomum, raro, epico, lendario;
+            const P = poderTotal;
+
+            if (P >= 0 && P <= 100) {
+                // FAIXA 1 (0-100)
+                comum = 80 - 0.2 * P;
+                incomum = 12 + 0.2 * P;
+                raro = 5;
+                epico = 2;
+                lendario = 1;
+            } else if (P >= 101 && P <= 200) {
+                // FAIXA 2 (101-200)
+                comum = 66 - 0.26 * P;
+                incomum = 28 + 0.2 * P;
+                raro = 1 + 0.06 * P;
+                epico = 4;
+                lendario = 1;
+            } else if (P >= 201 && P <= 300) {
+                // FAIXA 3 (201-300)
+                comum = 10;
+                incomum = 55 - 0.15 * P;
+                raro = 25 + 0.15 * P;
+                epico = 8;
+                lendario = 2;
+            } else if (P >= 301 && P <= 400) {
+                // FAIXA 4 (301-400)
+                comum = 10;
+                incomum = 80 - 0.2 * P;
+                raro = 100 - 0.2 * P;
+                epico = -65 + 0.3 * P;
+                lendario = -25 + 0.1 * P;
+            } else {
+                // FAIXA 5 (acima de 400)
+                comum = 0;
+                incomum = 0;
+                raro = 10;
+                epico = 60;
+                lendario = 30;
+            }
+
+            // Garantir que valores não sejam negativos
+            comum = Math.max(0, comum);
+            incomum = Math.max(0, incomum);
+            raro = Math.max(0, raro);
+            epico = Math.max(0, epico);
+            lendario = Math.max(0, lendario);
 
             // Normalizar para sempre somar 100%
             const total = comum + incomum + raro + epico + lendario;
